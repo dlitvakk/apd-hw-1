@@ -64,6 +64,10 @@ public struct StudyItem: Codable, Equatable {
             isCompleted: isCompleted
         )
     }
+    
+    mutating func setIsCompleted(_ value: Bool) {
+        self.isCompleted = value
+    }
 }
 
 public struct StudyPlan: Codable, Equatable {
@@ -97,15 +101,23 @@ public struct StudyPlan: Codable, Equatable {
     }
 
     public func items(in category: StudyCategory) -> [StudyItem] {
-        fatalError("Implement category query")
+        return items.filter { item in
+            item.category == category
+        }
     }
 
     public func incompleteMinutes() -> Int {
-        fatalError("Implement incomplete-minute query")
+        items.filter{ item in
+            item.isCompleted == false
+        } .reduce(0) { $0 + $1.estimatedMinutes }
     }
 
     public mutating func markCompleted(id: String) throws {
-        fatalError("Implement completion mutation")
+        guard let index = items.firstIndex(where: { $0.id == id }) else {
+            throw StudyPlanError.unknownID(id)
+        }
+        
+        items[index].setIsCompleted(true)
     }
 
     public mutating func importMerging(_ importedItems: [StudyItem]) throws {
