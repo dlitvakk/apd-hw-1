@@ -155,4 +155,34 @@ final class StudyPlannerPublicTests: XCTestCase {
 
         XCTAssertFalse(item.isCompleted)
     }
+    
+    func testDuplicateIDsReported() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading)
+        let b = try StudyItem(id: "y", title: "B", estimatedMinutes: 10, category: .reading)
+        let c = try StudyItem(id: "x", title: "B", estimatedMinutes: 10, category: .reading)
+        
+        XCTAssertThrowsError(try StudyPlan(items: [a, b, c])) { error in
+            XCTAssertEqual(error as? StudyPlanError, .duplicateID("x"))
+        }
+    }
+    
+    func testItemsSortedByTitle() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading)
+        let b = try StudyItem(id: "y", title: "C", estimatedMinutes: 10, category: .reading)
+        let c = try StudyItem(id: "z", title: "B", estimatedMinutes: 10, category: .reading)
+        
+        let plan = try StudyPlan(items: [a, b, c])
+        
+        XCTAssertEqual(plan.items.map { $0.title }, ["A", "B", "C"])
+    }
+    
+    func testItemsSortedById() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading)
+        let b = try StudyItem(id: "z", title: "B", estimatedMinutes: 10, category: .reading)
+        let c = try StudyItem(id: "y", title: "B", estimatedMinutes: 10, category: .reading)
+        
+        let plan = try StudyPlan(items: [a, b, c])
+        
+        XCTAssertEqual(plan.items.map { $0.id }, ["x", "y", "z"])
+    }
 }
