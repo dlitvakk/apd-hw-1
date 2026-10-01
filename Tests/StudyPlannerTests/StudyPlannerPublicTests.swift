@@ -41,4 +41,13 @@ final class StudyPlannerPublicTests: XCTestCase {
             try StudyItem(id: "x", title: "A", estimatedMinutes: 0, category: .practice)
         )
     }
+    
+    func testTitleErrorPrecedenceOverMinutes() {
+        XCTAssertThrowsError(
+            try StudyItem(id: "x", title: "   ", estimatedMinutes: -5, category: .practice)
+        ) {
+            error in
+            XCTAssertEqual(error as? StudyPlanError, .blankTitle)
+        }
+    }
 }
