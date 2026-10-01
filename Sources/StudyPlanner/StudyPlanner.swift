@@ -41,6 +41,29 @@ public struct StudyItem: Codable, Equatable {
         self.isCompleted = isCompleted
         
     }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, title, estimatedMinutes, category, isCompleted
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let id = try container.decode(String.self, forKey: .id)
+        let title = try container.decode(String.self, forKey: .title)
+        let estimatedMinutes = try container.decode(Int.self, forKey: .estimatedMinutes)
+        let category = try container.decode(StudyCategory.self, forKey: .category)
+        let isCompleted = try container.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
+        
+        try self.init(
+            id: id,
+            title: title,
+            estimatedMinutes: estimatedMinutes,
+            category: category,
+            isCompleted: isCompleted
+        )
+    }
 }
 
 public struct StudyPlan: Codable, Equatable {
