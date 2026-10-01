@@ -29,4 +29,25 @@ final class StudyPlannerPublicTests: XCTestCase {
 
         XCTAssertEqual(plan.incompleteMinutes(), 20)
     }
+    
+    func testNegativeMinutesIsRejected() {
+        XCTAssertThrowsError(
+            try StudyItem(id: "x", title: "A", estimatedMinutes: -10, category: .practice)
+        )
+    }
+    
+    func testZeroMinutesIsRejected() {
+        XCTAssertThrowsError(
+            try StudyItem(id: "x", title: "A", estimatedMinutes: 0, category: .practice)
+        )
+    }
+    
+    func testTitleErrorPrecedenceOverMinutes() {
+        XCTAssertThrowsError(
+            try StudyItem(id: "x", title: "   ", estimatedMinutes: -5, category: .practice)
+        ) {
+            error in
+            XCTAssertEqual(error as? StudyPlanError, .blankTitle)
+        }
+    }
 }
