@@ -50,4 +50,109 @@ final class StudyPlannerPublicTests: XCTestCase {
             XCTAssertEqual(error as? StudyPlanError, .blankTitle)
         }
     }
+    
+    func testValidJSONDecodingIsCorrect() throws {
+        let json = """
+        {
+            "id": "x",
+            "title": "A",
+            "estimatedMinutes": 30,
+            "category": "reading",
+            "isCompleted": false
+        }
+        """
+        let data = json.data(using: .utf8)!
+
+        let item = try JSONDecoder().decode(StudyItem.self, from: data)
+
+        XCTAssertEqual(item.id, "x")
+        XCTAssertEqual(item.title, "A")
+        XCTAssertEqual(item.estimatedMinutes, 30)
+        XCTAssertEqual(item.category, .reading)
+        XCTAssertFalse(item.isCompleted)
+    }
+    
+    func testBlankTitleJSONDecodingThrowsError() {
+        let json = """
+        {
+            "id": "x",
+            "title": "   ",
+            "estimatedMinutes": 10,
+            "category": "practice",
+            "isCompleted": false
+        }
+        """
+        let data = json.data(using: .utf8)!
+
+        XCTAssertThrowsError(try JSONDecoder().decode(StudyItem.self, from: data)) { error in
+            XCTAssertEqual(error as? StudyPlanError, .blankTitle)
+        }
+    }
+    
+    func testZeroMinutesJSONDecodingThrowsError() {
+        let json = """
+        {
+            "id": "x",
+            "title": "A",
+            "estimatedMinutes": 0,
+            "category": "practice",
+            "isCompleted": false
+        }
+        """
+        let data = json.data(using: .utf8)!
+
+        XCTAssertThrowsError(try JSONDecoder().decode(StudyItem.self, from: data)) { error in
+            XCTAssertEqual(error as? StudyPlanError, .nonPositiveEstimatedMinutes)
+        }
+    }
+    
+    func testNegativeMinutesJSONDecodingThrowsError() {
+        let json = """
+        {
+            "id": "x",
+            "title": "A",
+            "estimatedMinutes": -10,
+            "category": "practice",
+            "isCompleted": false
+        }
+        """
+        let data = json.data(using: .utf8)!
+
+        XCTAssertThrowsError(try JSONDecoder().decode(StudyItem.self, from: data)) { error in
+            XCTAssertEqual(error as? StudyPlanError, .nonPositiveEstimatedMinutes)
+        }
+    }
+    
+    func testTitleErrorPrecedenceOverMinutesJSONDecodingThrows() {
+        let json = """
+        {
+            "id": "x",
+            "title": "    ",
+            "estimatedMinutes": -10,
+            "category": "practice",
+            "isCompleted": false
+        }
+        """
+        let data = json.data(using: .utf8)!
+
+        XCTAssertThrowsError(try JSONDecoder().decode(StudyItem.self, from: data)) { error in
+            XCTAssertEqual(error as? StudyPlanError, .blankTitle)
+        }
+    }
+    
+    func testMissingIsCompletedDefaultsToFalse() throws {
+        let json = """
+        {
+            "id": "x",
+            "title": "Valid title",
+            "estimatedMinutes": 10,
+            "category": "project"
+        }
+        """
+        let data = json.data(using: .utf8)!
+
+        let item = try JSONDecoder().decode(StudyItem.self, from: data)
+
+        XCTAssertFalse(item.isCompleted)
+    }
 }
