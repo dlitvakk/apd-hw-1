@@ -7,6 +7,7 @@ Use one entry for each tool-assisted or agent-assisted task. Do not include secr
 01/10 
 
 - given the fixture of study-items json asked to generate multiple valid / non-valid jsons of study items (given also validation ruled)
+- asked to generate tests for json array decoding
 ## Output reviewed
 
 Summarize the output or changed files you reviewed.

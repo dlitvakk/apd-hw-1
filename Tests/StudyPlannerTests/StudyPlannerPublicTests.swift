@@ -156,6 +156,54 @@ final class StudyPlannerPublicTests: XCTestCase {
         XCTAssertFalse(item.isCompleted)
     }
     
+    func testKeyedDecoding() throws {
+        let json = """
+        {
+            "items": [
+                { "id": "a", "title": "A", "estimatedMinutes": 10, "category": "reading", "isCompleted": false }
+            ]
+        }
+        """
+        let data = json.data(using: .utf8)!
+        
+        let plan = try JSONDecoder().decode(StudyPlan.self, from: data)
+        
+        XCTAssertEqual(plan.items.count, 1)
+    }
+    
+    func testKeyedDecodingRejectsDuplicateIDs() {
+        let json = """
+        {
+            "items": [
+                { "id": "x", "title": "A", "estimatedMinutes": 10, "category": "reading", "isCompleted": false },
+                { "id": "x", "title": "B", "estimatedMinutes": 20, "category": "practice", "isCompleted": false }
+            ]
+        }
+        """
+        let data = json.data(using: .utf8)!
+        
+        XCTAssertThrowsError(try JSONDecoder().decode(StudyPlan.self, from: data)) { error in
+            XCTAssertEqual(error as? StudyPlanError, .duplicateID("x"))
+        }
+    }
+    
+    func testStudyPlanDecodesFromTopLevelJSONArrayFixture() throws {
+        let thisFile = URL(fileURLWithPath: #filePath)
+        let fixtureURL = thisFile
+            .deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/study-items.json")
+        let data = try Data(contentsOf: fixtureURL)
+        
+        let plan = try StudyPlan.decode(from: data)
+        
+        XCTAssertEqual(plan.items.count, 3)
+        
+        let ids = plan.items.map { $0.id }
+        XCTAssertTrue(ids.contains("swift-chapter-1"))
+        XCTAssertTrue(ids.contains("collections-drill"))
+        XCTAssertTrue(ids.contains("planner-milestone"))
+    }
+    
     func testDuplicateIDsReported() throws {
         let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading)
         let b = try StudyItem(id: "y", title: "B", estimatedMinutes: 10, category: .reading)

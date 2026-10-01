@@ -95,9 +95,24 @@ public struct StudyPlan: Codable, Equatable {
         
         self.items = sorted
     }
+    
+    enum CodingKeys: String, CodingKey {
+        case items
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let items = try container.decode([StudyItem].self, forKey: .items)
+        try self.init(items: items)
+    }
 
     public static func decode(from data: Data) throws -> StudyPlan {
-        fatalError("Implement array decoding")
+        
+        let items = try JSONDecoder().decode([StudyItem].self, from: data)
+        
+        return try StudyPlan(items: items)
     }
 
     public func items(in category: StudyCategory) -> [StudyItem] {
