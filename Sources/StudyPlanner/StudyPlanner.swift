@@ -70,7 +70,26 @@ public struct StudyPlan: Codable, Equatable {
     public private(set) var items: [StudyItem]
 
     public init(items: [StudyItem]) throws {
-        fatalError("Implement plan validation")
+        
+        var ids = Set<String>()
+        
+        for item in items {
+            guard !ids.contains(item.id) else {
+                throw StudyPlanError.duplicateID(item.id)
+            }
+            
+            ids.insert(item.id)
+        }
+        
+        let sorted = items.sorted { left, right in
+            if left.title != right.title {
+                return left.title < right.title
+            } else {
+                return left.id < right.id
+            }
+        }
+        
+        self.items = sorted
     }
 
     public static func decode(from data: Data) throws -> StudyPlan {

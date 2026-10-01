@@ -4,8 +4,9 @@ Use one entry for each tool-assisted or agent-assisted task. Do not include secr
 
 ## Tool/agent task
 
-Describe the bounded task and the input you supplied.
+01/10 
 
+- given the fixture of study-items json asked to generate multiple valid / non-valid jsons of study items (given also validation ruled)
 ## Output reviewed
 
 Summarize the output or changed files you reviewed.
