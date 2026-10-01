@@ -29,4 +29,16 @@ final class StudyPlannerPublicTests: XCTestCase {
 
         XCTAssertEqual(plan.incompleteMinutes(), 20)
     }
+    
+    func testNegativeMinutesIsRejected() {
+        XCTAssertThrowsError(
+            try StudyItem(id: "x", title: "A", estimatedMinutes: -10, category: .practice)
+        )
+    }
+    
+    func testZeroMinutesIsRejected() {
+        XCTAssertThrowsError(
+            try StudyItem(id: "x", title: "A", estimatedMinutes: 0, category: .practice)
+        )
+    }
 }

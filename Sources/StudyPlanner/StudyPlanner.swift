@@ -34,7 +34,12 @@ public struct StudyItem: Codable, Equatable {
             throw StudyPlanError.nonPositiveEstimatedMinutes
         }
         
-        fatalError("Implement StudyItem validation")
+        self.id = id
+        self.title = title
+        self.estimatedMinutes = estimatedMinutes
+        self.category = category
+        self.isCompleted = isCompleted
+        
     }
 }
 
