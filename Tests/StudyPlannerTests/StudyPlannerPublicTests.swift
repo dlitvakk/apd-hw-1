@@ -185,4 +185,47 @@ final class StudyPlannerPublicTests: XCTestCase {
         
         XCTAssertEqual(plan.items.map { $0.id }, ["x", "y", "z"])
     }
+    
+    func testFilterItemsByCategory() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading)
+        let b = try StudyItem(id: "y", title: "B", estimatedMinutes: 10, category: .practice)
+        let c = try StudyItem(id: "z", title: "C", estimatedMinutes: 10, category: .reading)
+        
+        let readingPlan = try StudyPlan(items: [a, b, c]).items(in: .reading)
+        
+        XCTAssertEqual(readingPlan.count, 2)
+    }
+    
+    func testCountIncompletedMinutes() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading, isCompleted: true)
+        let b = try StudyItem(id: "y", title: "B", estimatedMinutes: 20, category: .practice)
+        let c = try StudyItem(id: "z", title: "C", estimatedMinutes: 30, category: .reading)
+        
+        let incompletedMinutes = try StudyPlan(items: [a, b, c]).incompleteMinutes()
+        
+        XCTAssertEqual(incompletedMinutes, 50)
+    }
+    
+    func testItemMarkedAsCompleted() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading, isCompleted: true)
+        let b = try StudyItem(id: "y", title: "B", estimatedMinutes: 20, category: .practice)
+        let c = try StudyItem(id: "z", title: "C", estimatedMinutes: 30, category: .reading)
+        
+        var plan = try StudyPlan(items: [a, b, c])
+        try plan.markCompleted(id: "z")
+        
+        XCTAssertTrue(plan.items.contains(where: { $0.id == "z" && $0.isCompleted }))
+    }
+    
+    func testItemMarkedAsCompletedIdempotent() throws {
+        let a = try StudyItem(id: "x", title: "A", estimatedMinutes: 10, category: .reading, isCompleted: true)
+        let b = try StudyItem(id: "y", title: "B", estimatedMinutes: 20, category: .practice)
+        let c = try StudyItem(id: "z", title: "C", estimatedMinutes: 30, category: .reading)
+        
+        var plan = try StudyPlan(items: [a, b, c])
+        try plan.markCompleted(id: "z")
+        try plan.markCompleted(id: "z")
+        
+        XCTAssertTrue(plan.items.contains(where: { $0.id == "z" && $0.isCompleted }))
+    }
 }
